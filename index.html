@@ -13,6 +13,7 @@
     .card { background:white; padding:15px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
     button { background:#d2691e; color:white; border:none; padding:10px; width:100%; border-radius:5px; cursor:pointer; }
     input, select { width:100%; padding:10px; margin:5px 0; }
+    #total { font-weight:bold; margin-top:10px; }
   </style>
 </head>
 <body>
@@ -42,24 +43,45 @@
 </div>
 
 <h2>Order Now</h2>
-<form>
-  <input type="text" placeholder="Your Name" required>
-  <input type="text" placeholder="Phone Number" required>
-  <input type="text" placeholder="Delivery Address" required>
+<form action="https://formspree.io/f/mabcdxyz" method="POST" id="orderForm">
+  <input type="text" name="name" placeholder="Your Name" required>
+  <input type="text" name="phone" placeholder="Phone Number" required>
+  <input type="text" name="address" placeholder="Delivery Address" required>
 
   <label>Cookies Quantity</label>
-  <input type="number" min="0">
+  <input type="number" name="cookies" id="cookiesQty" min="0" value="0">
 
   <label>Coffee Type</label>
-  <select>
-    <option>None</option>
-    <option>Hot Coffee</option>
-    <option>Iced Coffee</option>
-    <option>Cold Brew</option>
+  <select name="coffee" id="coffeeType">
+    <option value="0">None</option>
+    <option value="3">Hot Coffee</option>
+    <option value="4">Iced Coffee</option>
+    <option value="5">Cold Brew</option>
   </select>
 
+  <p id="total">Total: $0.00</p>
+
+  <input type="hidden" name="_redirect" value="https://yourthankyoupage.com">
   <button type="submit">Submit Order</button>
 </form>
+
+<script>
+  const cookiesInput = document.getElementById('cookiesQty');
+  const coffeeSelect = document.getElementById('coffeeType');
+  const totalDisplay = document.getElementById('total');
+
+  function calculateTotal() {
+    const cookiesPrice = 2.5;
+    const cookiesQty = parseInt(cookiesInput.value) || 0;
+    const coffeePrice = parseFloat(coffeeSelect.value) || 0;
+    const total = (cookiesQty * cookiesPrice) + coffeePrice;
+    totalDisplay.textContent = `Total: $${total.toFixed(2)}`;
+  }
+
+  cookiesInput.addEventListener('input', calculateTotal);
+  coffeeSelect.addEventListener('change', calculateTotal);
+  calculateTotal();
+</script>
 
 </div>
 
