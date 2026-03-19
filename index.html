@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roanoke Cookie & Coffee Co.</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin:0; background:#f8f5f2; }
+    header { background:#4b2e2e; color:white; padding:20px; text-align:center; }
+    h1 { margin:0; }
+    .container { padding:20px; }
+    .menu { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .card { background:white; padding:15px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+    button { background:#d2691e; color:white; border:none; padding:10px; width:100%; border-radius:5px; cursor:pointer; }
+    input, select { width:100%; padding:10px; margin:5px 0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🍪 Roanoke Cookie & Coffee Co.</h1>
+  <p>Fresh • Warm • Delivered ☕</p>
+</header>
+
+<div class="container">
+
+<h2>Menu</h2>
+<div class="menu">
+  <div class="card">
+    <h3>Cookies</h3>
+    <p>Chocolate Chip - $2.50</p>
+    <p>Double Chocolate - $2.50</p>
+    <p>Peanut Butter - $2.50</p>
+  </div>
+
+  <div class="card">
+    <h3>Coffee</h3>
+    <p>Hot Coffee - $3</p>
+    <p>Iced Coffee - $4</p>
+    <p>Cold Brew - $5</p>
+  </div>
+</div>
+
+<h2>Order Now</h2>
+<form>
+  <input type="text" placeholder="Your Name" required>
+  <input type="text" placeholder="Phone Number" required>
+  <input type="text" placeholder="Delivery Address" required>
+
+  <label>Cookies Quantity</label>
+  <input type="number" min="0">
+
+  <label>Coffee Type</label>
+  <select>
+    <option>None</option>
+    <option>Hot Coffee</option>
+    <option>Iced Coffee</option>
+    <option>Cold Brew</option>
+  </select>
+
+  <button type="submit">Submit Order</button>
+</form>
+
+</div>
+
+</body>
+</html>
