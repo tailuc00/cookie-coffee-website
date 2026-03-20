@@ -11,9 +11,11 @@
     .container { padding:20px; }
     .menu { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
     .card { background:white; padding:15px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-    button { background:#d2691e; color:white; border:none; padding:10px; width:100%; border-radius:5px; cursor:pointer; }
+    button { background:#d2691e; color:white; border:none; padding:10px; width:100%; border-radius:5px; cursor:pointer; margin-top:5px; }
     input, select { width:100%; padding:10px; margin:5px 0; }
     #summary { background:#fff; padding:10px; border-radius:8px; margin-top:10px; }
+    .coffee-row { display:flex; gap:10px; }
+    .coffee-row input, .coffee-row select { flex: 1; }
   </style>
 </head>
 <body>
@@ -38,22 +40,18 @@
 </div>
 
 <h2>Order Now</h2>
-<form action="https://formspree.io/f/mvzwyorn" method="POST">
+<form action="https://formspree.io/f/mvzwyorn" method="POST" id="orderForm">
   <input type="text" name="name" placeholder="Your Name" required>
   <input type="text" name="phone" placeholder="Phone Number" required>
   <input type="text" name="address" placeholder="Delivery Address" required>
 
   <label>Cookies Quantity</label>
-  <input type="number" id="cookiesQty" min="0" value="0">
+  <input type="number" name="cookies" id="cookiesQty" min="0" value="0">
 
-  <label>Hot Coffee Quantity ($3)</label>
-  <input type="number" id="hotQty" min="0" value="0">
-
-  <label>Iced Coffee Quantity ($4)</label>
-  <input type="number" id="icedQty" min="0" value="0">
-
-  <label>Cold Brew Quantity ($5)</label>
-  <input type="number" id="coldQty" min="0" value="0">
+  <div id="coffeeContainer">
+    <label>Coffee Orders</label>
+  </div>
+  <button type="button" id="addCoffeeBtn">Add Coffee Type</button>
 
   <div id="summary">
     <p id="orderSummary">Order Summary</p>
@@ -61,9 +59,7 @@
   </div>
 
   <!-- hidden fields -->
-  <input type="hidden" name="cookies" id="cookiesHidden">
-  <input type="hidden" name="coffee" id="coffeeHidden">
-  <input type="hidden" name="coffeeType" id="coffeeTypeHidden">
+  <input type="hidden" name="coffeeSummary" id="coffeeHidden">
   <input type="hidden" name="total" id="totalHidden">
 
   <button type="submit">Submit Order</button>
@@ -71,69 +67,71 @@
 
 <script>
   const cookiesInput = document.getElementById('cookiesQty');
-  const hotQtyInput = document.getElementById('hotQty');
-  const icedQtyInput = document.getElementById('icedQty');
-  const coldQtyInput = document.getElementById('coldQty');
-
+  const coffeeContainer = document.getElementById('coffeeContainer');
+  const addCoffeeBtn = document.getElementById('addCoffeeBtn');
   const summary = document.getElementById('orderSummary');
   const totalDisplay = document.getElementById('total');
-
-  const cookiesHidden = document.getElementById('cookiesHidden');
   const coffeeHidden = document.getElementById('coffeeHidden');
   const totalHidden = document.getElementById('totalHidden');
-  const coffeeTypeHidden = document.getElementById('coffeeTypeHidden');
+
+  const coffeeTypes = [
+    {name: 'Hot Coffee', price: 3},
+    {name: 'Iced Coffee', price: 4},
+    {name: 'Cold Brew', price: 5}
+  ];
+
+  function addCoffeeRow() {
+    const row = document.createElement('div');
+    row.className = 'coffee-row';
+    row.innerHTML = `
+      <select class="coffeeTypeSelect">
+        ${coffeeTypes.map(c => `<option value="${c.price}">${c.name} ($${c.price})</option>`).join('')}
+      </select>
+      <input type="number" class="coffeeQtyInput" min="0" value="0">
+    `;
+    coffeeContainer.appendChild(row);
+    const select = row.querySelector('.coffeeTypeSelect');
+    const qtyInput = row.querySelector('.coffeeQtyInput');
+    select.addEventListener('change', calculateTotal);
+    qtyInput.addEventListener('input', calculateTotal);
+    calculateTotal();
+  }
+
+  addCoffeeBtn.addEventListener('click', addCoffeeRow);
 
   function calculateTotal() {
     const cookiesPrice = 2.5;
     const cookiesQty = parseInt(cookiesInput.value) || 0;
+    let subtotal = cookiesQty * cookiesPrice;
 
-    const hotQty = parseInt(hotQtyInput.value) || 0;
-    const icedQty = parseInt(icedQtyInput.value) || 0;
-    const coldQty = parseInt(coldQtyInput.value) || 0;
+    const coffeeRows = document.querySelectorAll('.coffee-row');
+    let coffeeSummary = [];
 
-    const hotPrice = 3;
-    const icedPrice = 4;
-    const coldPrice = 5;
+    coffeeRows.forEach(row => {
+      const typeSelect = row.querySelector('.coffeeTypeSelect');
+      const qtyInput = row.querySelector('.coffeeQtyInput');
+      const qty = parseInt(qtyInput.value) || 0;
+      const price = parseFloat(typeSelect.value) || 0;
+      if (qty > 0) {
+        subtotal += qty * price;
+        coffeeSummary.push(`${typeSelect.options[typeSelect.selectedIndex].text} x ${qty}`);
+      }
+    });
 
-    let subtotal = (cookiesQty * cookiesPrice) +
-                   (hotQty * hotPrice) +
-                   (icedQty * icedPrice) +
-                   (coldQty * coldPrice);
-
-    // delivery logic
     let delivery = subtotal >= 15 ? 0 : 5;
-
-    // combo discount
-    let totalCoffeeQty = hotQty + icedQty + coldQty;
-    let discount = (totalCoffeeQty > 0 && cookiesQty >= 2) ? 1 : 0;
-
+    let discount = (coffeeSummary.length > 0 && cookiesQty >= 2) ? 1 : 0;
     const total = subtotal + delivery - discount;
 
-    summary.innerHTML = `Cookies: ${cookiesQty}<br>
-      Hot Coffee x ${hotQty}<br>
-      Iced Coffee x ${icedQty}<br>
-      Cold Brew x ${coldQty}<br>
-      Delivery: $${delivery}<br>
-      Discount: -$${discount}`;
-
+    summary.innerHTML = `Cookies: ${cookiesQty}<br>${coffeeSummary.join('<br>')}<br>Delivery: $${delivery}<br>Discount: -$${discount}`;
     totalDisplay.textContent = `Total: $${total.toFixed(2)}`;
 
-    // send clean data
-    cookiesHidden.value = cookiesQty;
-    coffeeHidden.value = `Hot: ${hotQty}, Iced: ${icedQty}, Cold Brew: ${coldQty}`;
-    coffeeTypeHidden.value = coffeeText;
+    coffeeHidden.value = coffeeSummary.join('; ');
     totalHidden.value = `$${total.toFixed(2)}`;
   }
 
   cookiesInput.addEventListener('input', calculateTotal);
-  hotQtyInput.addEventListener('input', calculateTotal);
-  icedQtyInput.addEventListener('input', calculateTotal);
-  coldQtyInput.addEventListener('input', calculateTotal);
-
-  calculateTotal();
 </script>
 
 </div>
-
 </body>
 </html>
