@@ -14,8 +14,9 @@
     button { background:#d2691e; color:white; border:none; padding:10px; width:100%; border-radius:5px; cursor:pointer; margin-top:5px; }
     input, select { width:100%; padding:10px; margin:5px 0; }
     #summary { background:#fff; padding:10px; border-radius:8px; margin-top:10px; }
-    .coffee-row { display:flex; gap:10px; }
+    .coffee-row { display:flex; gap:10px; align-items:center; background:#fff3e0; padding:10px; border-radius:8px; margin-bottom:5px; box-shadow:0 1px 3px rgba(0,0,0,0.1); }
     .coffee-row input, .coffee-row select { flex: 1; }
+    .removeBtn { background:#b22222; width:auto; padding:5px 10px; }
   </style>
 </head>
 <body>
@@ -88,12 +89,21 @@
         ${coffeeTypes.map(c => `<option value="${c.price}">${c.name} ($${c.price})</option>`).join('')}
       </select>
       <input type="number" class="coffeeQtyInput" min="0" value="0">
+      <button type="button" class="removeBtn">Remove</button>
     `;
     coffeeContainer.appendChild(row);
+
     const select = row.querySelector('.coffeeTypeSelect');
     const qtyInput = row.querySelector('.coffeeQtyInput');
+    const removeBtn = row.querySelector('.removeBtn');
+
     select.addEventListener('change', calculateTotal);
     qtyInput.addEventListener('input', calculateTotal);
+    removeBtn.addEventListener('click', () => {
+      row.remove();
+      calculateTotal();
+    });
+
     calculateTotal();
   }
 
