@@ -13,7 +13,7 @@
     .card { background:white; padding:15px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
     button { background:#d2691e; color:white; border:none; padding:10px; width:100%; border-radius:5px; cursor:pointer; }
     input, select { width:100%; padding:10px; margin:5px 0; }
-    #total { font-weight:bold; margin-top:10px; }
+    #summary { background:#fff; padding:10px; border-radius:8px; margin-top:10px; }
   </style>
 </head>
 <body>
@@ -29,57 +29,92 @@
 <div class="menu">
   <div class="card">
     <h3>Cookies</h3>
-    <p>Chocolate Chip - $2.50</p>
-    <p>Double Chocolate - $2.50</p>
-    <p>Peanut Butter - $2.50</p>
+    <p>$2.50 each</p>
   </div>
-
   <div class="card">
     <h3>Coffee</h3>
-    <p>Hot Coffee - $3</p>
-    <p>Iced Coffee - $4</p>
-    <p>Cold Brew - $5</p>
+    <p>Hot $3 | Iced $4 | Cold Brew $5</p>
   </div>
 </div>
 
 <h2>Order Now</h2>
-<form action="https://formspree.io/f/mvzwyorn" method="POST" id="orderForm">
+<form action="https://formspree.io/f/mvzwyorn" method="POST">
   <input type="text" name="name" placeholder="Your Name" required>
   <input type="text" name="phone" placeholder="Phone Number" required>
   <input type="text" name="address" placeholder="Delivery Address" required>
 
   <label>Cookies Quantity</label>
-  <input type="number" name="cookies" id="cookiesQty" min="0" value="0">
+  <input type="number" id="cookiesQty" min="0" value="0">
 
   <label>Coffee Type</label>
-  <select name="coffee" id="coffeeType">
+  <select id="coffeeType">
     <option value="0">None</option>
     <option value="3">Hot Coffee</option>
     <option value="4">Iced Coffee</option>
     <option value="5">Cold Brew</option>
   </select>
 
-  <p id="total">Total: $0.00</p>
+  <label>Coffee Quantity</label>
+  <input type="number" id="coffeeQty" min="0" value="0">
 
-  <input type="hidden" name="_redirect" value="https://yourthankyoupage.com">
+  <div id="summary">
+    <p id="orderSummary">Order Summary</p>
+    <p id="total">Total: $0.00</p>
+  </div>
+
+  <!-- hidden fields -->
+  <input type="hidden" name="cookies" id="cookiesHidden">
+  <input type="hidden" name="coffee" id="coffeeHidden">
+  <input type="hidden" name="total" id="totalHidden">
+
   <button type="submit">Submit Order</button>
 </form>
 
 <script>
   const cookiesInput = document.getElementById('cookiesQty');
   const coffeeSelect = document.getElementById('coffeeType');
+  const coffeeQtyInput = document.getElementById('coffeeQty');
+
+  const summary = document.getElementById('orderSummary');
   const totalDisplay = document.getElementById('total');
+
+  const cookiesHidden = document.getElementById('cookiesHidden');
+  const coffeeHidden = document.getElementById('coffeeHidden');
+  const totalHidden = document.getElementById('totalHidden');
 
   function calculateTotal() {
     const cookiesPrice = 2.5;
     const cookiesQty = parseInt(cookiesInput.value) || 0;
+
     const coffeePrice = parseFloat(coffeeSelect.value) || 0;
-    const total = (cookiesQty * cookiesPrice) + coffeePrice;
+    const coffeeQty = parseInt(coffeeQtyInput.value) || 0;
+
+    let subtotal = (cookiesQty * cookiesPrice) + (coffeePrice * coffeeQty);
+
+    // delivery logic
+    let delivery = subtotal >= 15 ? 0 : 5;
+
+    // combo discount
+    let discount = (coffeeQty > 0 && cookiesQty >= 2) ? 1 : 0;
+
+    const total = subtotal + delivery - discount;
+
+    const coffeeText = coffeeSelect.options[coffeeSelect.selectedIndex].text;
+
+    summary.innerHTML = `Cookies: ${cookiesQty}<br> ${coffeeText} x ${coffeeQty}<br> Delivery: $${delivery}<br> Discount: -$${discount}`;
+
     totalDisplay.textContent = `Total: $${total.toFixed(2)}`;
+
+    // send clean data
+    cookiesHidden.value = cookiesQty;
+    coffeeHidden.value = `${coffeeText} x ${coffeeQty}`;
+    totalHidden.value = `$${total.toFixed(2)}`;
   }
 
   cookiesInput.addEventListener('input', calculateTotal);
   coffeeSelect.addEventListener('change', calculateTotal);
+  coffeeQtyInput.addEventListener('input', calculateTotal);
+
   calculateTotal();
 </script>
 
